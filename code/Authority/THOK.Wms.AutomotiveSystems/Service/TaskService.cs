@@ -324,11 +324,13 @@ namespace THOK.Wms.AutomotiveSystems.Service
                
                 THOK.Wms.AutomotiveSystems.Models.BillDetail[] billDetails1 = new THOK.Wms.AutomotiveSystems.Models.BillDetail[] { };
                 THOK.Wms.AutomotiveSystems.Models.BillDetail[] billDetails2 = new THOK.Wms.AutomotiveSystems.Models.BillDetail[] { };
-
-                //查询大于等于30件的数据
+                THOK.Wms.AutomotiveSystems.Models.BillDetail[] billDetails3 = new THOK.Wms.AutomotiveSystems.Models.BillDetail[] { };
+                
+                ////查询大于等于30件的数据
                 billDetails1 = billDetails.Where(s => s.Total >= 30).OrderByDescending(i => i.Status)
-                                                .ThenBy(b => b.StorageName).ThenBy(f => f.ProductCode).ToArray();
-                //查询小于30件的数据
+                    //.ThenBy(b => b.StorageName).ThenBy(f => f.ProductCode).ToArray();
+                                                .ThenBy(b => b.TargetStorageName).ThenBy(B => B.StorageName).ThenBy(b => b.ProductCode).ToArray();
+                ////查询小于30件的数据
                 billDetails2 = billDetails.Where(s => s.Total < 30).OrderByDescending(i => i.Status)
                                                 .ThenBy(b => b.StorageName).ThenBy(f => f.ProductCode).ToArray();
                 //合并显示
@@ -621,7 +623,7 @@ namespace THOK.Wms.AutomotiveSystems.Service
                                         inAllot.Storage.Rfid = billDetail.StorageRfid;
                                         inAllot.RealQuantity += quantity;
                                         inAllot.Storage.Quantity += quantity;
-                                        if(inAllot.Storage.Cell.IsSingle=="1")//货位管理更改入库时间
+                                        if (inAllot.Storage.Cell.IsSingle == "1")//货位管理更改入库时间
                                             inAllot.Storage.StorageTime = DateTime.Now;
                                         inAllot.Storage.InFrozenQuantity -= quantity;
                                         inAllot.InBillDetail.RealQuantity += quantity;
@@ -631,9 +633,10 @@ namespace THOK.Wms.AutomotiveSystems.Service
                                         {
                                             inAllot.InBillMaster.Status = "6";
                                         }
-                                        if (useTag == "1")    
+                                        if (useTag == "1")
                                             CancelOperateToLabelServer(inAllot.BillNo, inAllot.ID.ToString(), inAllot.Cell.CellName);
 
+                                        DeletePalletInfo(billDetail.StorageRfid);
                                         result.IsSuccess = true;
                                     }
                                     else
@@ -862,6 +865,11 @@ namespace THOK.Wms.AutomotiveSystems.Service
             THOK.Wms.AutomotiveSystems.Models.BillDetail[] billDetails = new THOK.Wms.AutomotiveSystems.Models.BillDetail[] { };
             try
             {
+                //删除7天之前的跺信息
+                string sql = @" DELETE INTER_PALLET WHERE OPERATE_DATE <
+                            CONVERT(VARCHAR(14),DATEADD(DAY, -2, CONVERT(VARCHAR(100), GETDATE(), 112)),112)";
+                PalletRepository.GetObjectSet().ExecuteStoreCommand(sql);
+
                 var PalletInfo = PalletRepository.GetQueryable()
                                .Where(t => t.PalletID == rfid)
                                .Select(t => new THOK.Wms.AutomotiveSystems.Models.BillDetail()
@@ -878,6 +886,41 @@ namespace THOK.Wms.AutomotiveSystems.Service
             {
                 result.IsSuccess = false;
                 result.Message = "调用服务器服务查询托盘信息失败！，详情：" + e.InnerException.Message + "  其他错误" + e.Message;
+            }
+        }
+
+        /// <summary>
+        /// 完成入库单时，删除跺信息
+        /// </summary>
+        /// <param name="rfid"></param>
+        private void DeletePalletInfo(string rfid)
+        {
+            
+            if (rfid.Length > 1)
+            {
+                string sql = @"DELETE INTER_PALLET WHERE PALLET_ID = '{0}'";
+                sql = string.Format(sql, rfid);
+                PalletRepository.GetObjectSet().ExecuteStoreCommand(sql);
+            }
+        }
+
+        public void SearchCellRfid(Result result)
+        {
+            try
+            {
+                var cellRfid = CellRepository.GetQueryable().Where(c => c.Rfid != "" && c.Rfid != null)
+                .Select(t => new THOK.Wms.AutomotiveSystems.Models.BillDetail()
+                                {
+                                    StorageName=t.CellName,
+                                    CellRfid = t.Rfid
+                                }).ToArray();
+                result.IsSuccess = true;
+                result.BillDetails = cellRfid;
+            }
+            catch (Exception e)
+            {
+                result.IsSuccess = false;
+                result.Message = "调用服务器服务查询货位RFID失败！，详情：" + e.InnerException.Message + "  其他错误" + e.Message;
             }
         }
 

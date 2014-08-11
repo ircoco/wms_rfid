@@ -467,8 +467,8 @@ namespace THOK.Wms.Bll.Service
                             (
                                   m.ProductCode
                                 , m.ProductName
-                                , m.RealQuantity
-                                , m.strRealQuantity
+                                , m.RealQuantity.ToString().TrimEnd('0').TrimEnd('.')
+                                , m.strRealQuantity.ToString().TrimEnd('0').TrimEnd('.')
                                 ,m.isAbnormity
                             );
                     }
@@ -479,8 +479,8 @@ namespace THOK.Wms.Bll.Service
                             (
                                   m.ProductCode
                                 , m.ProductName
-                                , m.RealQuantity
-                                , m.strRealQuantity
+                                , m.RealQuantity.ToString().TrimEnd('0').TrimEnd('.')
+                                , m.strRealQuantity.ToString().TrimEnd('0').TrimEnd('.')
                                 , m.isAbnormity
                             );
                     }
@@ -491,8 +491,8 @@ namespace THOK.Wms.Bll.Service
                             (
                                   m.ProductCode
                                 , m.ProductName
-                                , Convert.ToDecimal(m.RealQuantity)
-                                , Convert.ToDecimal(m.strRealQuantity)
+                                , Convert.ToDecimal(m.RealQuantity).ToString().TrimEnd('0').TrimEnd('.')
+                                , Convert.ToDecimal(m.strRealQuantity).ToString().TrimEnd('0').TrimEnd('.')
                                 , m.isAbnormity
                                , m.OutCellName + "移入" + m.InCellName
                             );
@@ -521,6 +521,7 @@ namespace THOK.Wms.Bll.Service
                                             Status = i.Status == "0" ? "未开始" : i.Status == "1" ? "已申请" : i.Status == "2" ? "已完成" : "空",
                                             isAbnormity = i.Product.IsAbnormity == "1" ? "*" : "",
                                         }).OrderBy(i => i.OutCellName).ThenBy(i => i.ProductCode);
+                                        //}).OrderBy(i => i.InCellName).ThenBy(I => I.OutCellName).ThenBy(i => i.ProductCode);
 
                     dt.Columns.Add("移出储位名称", typeof(string));
                     dt.Columns.Add("移入储位名称", typeof(string));
@@ -541,8 +542,8 @@ namespace THOK.Wms.Bll.Service
                             , m.ProductName
                             //, m.UnitCode
                             //, m.UnitName
-                            , m.RealQuantity
-                            , m.strRealQuantity
+                            , m.RealQuantity.ToString().TrimEnd('0').TrimEnd('.')
+                            , m.strRealQuantity.ToString().TrimEnd('0').TrimEnd('.')
                             , m.isAbnormity
                         );
                     }

@@ -396,7 +396,7 @@ namespace THOK.Wms.Allot.Service
                             InBillAllot billAllot = null;
                             decimal q1 = ibd.BillQuantity - ibd.AllotQuantity;
                             decimal q2 = allotQuantity * ibd.Unit.Count;
-                            if (q2 <= q1 && q2 <= ((cell.MaxQuantity >= ibd.Product.CellMaxProductQuantity ? ibd.Product.CellMaxProductQuantity : cell.MaxQuantity) * ibd.Unit.Count - (storage.Quantity + storage.InFrozenQuantity)))
+                            if (q2 <= q1 && q2 <= ((cell.MaxQuantity >= ibd.Product.CellMaxProductQuantity ? ibd.Product.CellMaxProductQuantity : cell.MaxQuantity) * ibd.Product.UnitList.Quantity01 * ibd.Product.UnitList.Quantity02 * ibd.Product.UnitList.Quantity03 - (storage.Quantity + storage.InFrozenQuantity)))
                             {
                                 try
                                 {

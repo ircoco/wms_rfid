@@ -24,6 +24,8 @@ namespace THOK.Wms.SignalR.Common
         public IStorageLocker Locker { get; set; }
         [Dependency]
         public IAreaRepository AreaRepository { get; set; }
+        [Dependency]
+        public IInBillAllotRepository inBillAllotRepository { get; set; }
 
         public MoveBillMaster CreateMoveBillMaster(string warehouseCode, string billTypeCode, string operatePersonID)
         {
@@ -64,8 +66,8 @@ namespace THOK.Wms.SignalR.Common
             //7：罚烟区 0；8：虚拟区 0；
             //9：其他区 0；
 
-            //主库区未满盘件烟移到件烟区
-            string[] areaTypes = new string[] { "1" };
+            //主库区、暂存区未满盘件烟移到件烟区
+            string[] areaTypes = new string[] { "1","4" };
             var ss = storages.Where(s => areaTypes.Any(a => a == s.Cell.Area.AreaType)
                                          && ((s.Quantity - s.OutFrozenQuantity) / s.Product.Unit.Count) >= 1)
                              .ToArray();
@@ -78,12 +80,17 @@ namespace THOK.Wms.SignalR.Common
                                           && c.IsSingle == "1")
                               .ToArray();
 
-                ss.AsParallel().ForAll(
-                    (Action<Storage>)delegate(Storage s)
-                    {
-                        MoveToPieceArea(moveBillMaster, s, cc);
-                    }
-                );
+                foreach (var s in ss.AsParallel())
+                {
+                    MoveToPieceArea(moveBillMaster,s,cc);
+                }
+
+                //ss.AsParallel().ForAll(
+                //    (Action<Storage>)delegate(Storage s)
+                //    {
+                //        MoveToPieceArea(moveBillMaster, s, cc);
+                //    }
+                //);
 
                 Locker.UnLock(ss);
             }
@@ -106,12 +113,17 @@ namespace THOK.Wms.SignalR.Common
                                                     && c.IsSingle == "1")
                                   .ToArray();
 
-                    ss.AsParallel().ForAll(
-                        (Action<Storage>)delegate(Storage s)
-                        {
-                            MoveToBarArea(moveBillMaster, s, cc);
-                        }
-                    );
+                    foreach (var s in ss.AsParallel())
+                    {
+                        MoveToBarArea(moveBillMaster, s, cc);
+                    }
+
+                    //ss.AsParallel().ForAll(
+                    //    (Action<Storage>)delegate(Storage s)
+                    //    {
+                    //        MoveToBarArea(moveBillMaster, s, cc);
+                    //    }
+                    //);
 
                     Locker.UnLock(ss);
                 }
@@ -133,12 +145,17 @@ namespace THOK.Wms.SignalR.Common
                                                     && c.IsSingle == "1")
                                   .ToArray();
 
-                    ss.AsParallel().ForAll(
-                        (Action<Storage>)delegate(Storage s)
-                        {
-                            MoveToBarArea(moveBillMaster, s, cc);
-                        }
-                    );
+                    foreach (var s in ss.AsParallel())
+                    {
+                        MoveToBarArea(moveBillMaster, s, cc);
+                    }
+
+                    //ss.AsParallel().ForAll(
+                    //    (Action<Storage>)delegate(Storage s)
+                    //    {
+                    //        MoveToBarArea(moveBillMaster, s, cc);
+                    //    }
+                    //);
 
                     Locker.UnLock(ss);
                 }
@@ -146,6 +163,9 @@ namespace THOK.Wms.SignalR.Common
                     return;
             }
             MoveBillDetailRepository.SaveChanges();
+
+            //修复BUG
+            //AddErrorFroenQuantityToMoveBill(moveBillMaster);
         }
 
         private void MoveToBarArea(MoveBillMaster moveBillMaster, Storage sourceStorage, Cell[] cc)
@@ -287,14 +307,14 @@ namespace THOK.Wms.SignalR.Common
             //主库区未满盘件烟移到件烟区
             string[] areaTypes = new string[] { "1" };
             var ss = storages.Where(s => areaTypes.Any(a => a == s.Cell.Area.AreaType)
-                                            && ((s.Quantity - s.OutFrozenQuantity) / s.Product.Unit.Count) > 1);
+                                            && ((s.Quantity - s.OutFrozenQuantity) / s.Product.Unit.Count) >= 1);
             if (ss.Count() > 0 && storageQuery.Where(s=>s.Cell.Area.AreaType == "2").Count() > 0) { return true; }
 
             //主库区件烟库区条烟移到条烟区
-            areaTypes = new string[] { "1", "2" };
-            ss = storages.Where(s => areaTypes.Any(a => a == s.Cell.Area.AreaType)
-                                        && (s.Quantity - s.OutFrozenQuantity) % s.Product.Unit.Count > 0);
-            if (ss.Count() > 0 && storageQuery.Where(s => s.Cell.Area.AreaType == "3").Count() > 0) { return true; }
+            ////areaTypes = new string[] { "1", "2" };
+            ////ss = storages.Where(s => areaTypes.Any(a => a == s.Cell.Area.AreaType)
+            ////                            && (s.Quantity - s.OutFrozenQuantity) % s.Product.Unit.Count > 0);
+            ////if (ss.Count() > 0 && storageQuery.Where(s => s.Cell.Area.AreaType == "3").Count() > 0) { return true; }
 
             return false;
         }
@@ -392,6 +412,65 @@ namespace THOK.Wms.SignalR.Common
             }
 
             return billNo;
+        }
+
+        /// <summary>
+        /// 添加错误出入库锁定量两到移库单
+        /// </summary>
+        public void AddErrorFroenQuantityToMoveBill(MoveBillMaster moveBillMaster)
+        {
+            IQueryable<MoveBillDetail> moveBillDetailQuery = MoveBillDetailRepository.GetQueryable();
+            IQueryable<Storage> storageQuery = StorageRepository.GetQueryable();
+            IQueryable<InBillAllot> inBillAllotQuery = inBillAllotRepository.GetQueryable();
+
+            var noFinishMoveDetail = moveBillDetailQuery.Where(m => m.Status != "2").ToArray();
+            var haveFrozenStorage = storageQuery.Where(s => s.InFrozenQuantity > 0 || s.OutFrozenQuantity > 0).ToArray();
+            var noFinishInBillDetail = inBillAllotQuery.Where(i => i.Status != "2").ToArray();
+
+            if (Locker.Lock(haveFrozenStorage))
+            {
+                foreach (var c in noFinishMoveDetail)
+                {
+                    var inStorge = haveFrozenStorage.Where(s=> s.StorageCode == c.InStorageCode).FirstOrDefault();
+                    var outStorge = haveFrozenStorage.Where(s => s.StorageCode == c.OutStorageCode).FirstOrDefault();
+
+                    inStorge.InFrozenQuantity -= c.RealQuantity;
+                    outStorge.OutFrozenQuantity -= c.RealQuantity;
+                }
+
+                foreach (var c in noFinishInBillDetail)
+                {
+                    var inStorge = haveFrozenStorage.Where(s=> s.StorageCode == c.StorageCode).FirstOrDefault();
+                    inStorge.InFrozenQuantity -= c.AllotQuantity;
+                }
+                var haveFrozenStorage2 = haveFrozenStorage.Where(h=> h.InFrozenQuantity>0 || h.OutFrozenQuantity >0);
+                if (haveFrozenStorage2.Any())
+                {
+                    var outFrozenStorage = haveFrozenStorage2.Where(o => o.OutFrozenQuantity > 0);
+                    foreach (var c in outFrozenStorage)
+                    {
+                        var inFrozenStorage = haveFrozenStorage2.Where(o => o.InFrozenQuantity == c.OutFrozenQuantity && c.ProductCode == o.ProductCode);
+                        if(inFrozenStorage.Any())
+                            Locker.LockKey = moveBillMaster.BillNo;
+                            //MoveBillDetail detail = new MoveBillDetail();
+                            //detail.BillNo = moveBillMaster.BillNo;
+                            //detail.ProductCode = sourceStorage.ProductCode;
+                            //detail.OutCellCode = sourceStorage.CellCode;
+                            //detail.OutStorageCode = sourceStorage.StorageCode;
+                            //detail.InCellCode = targetStorage.CellCode;
+                            //detail.InStorageCode = targetStorage.StorageCode;
+                            //detail.UnitCode = sourceStorage.Product.UnitCode;
+                            //detail.RealQuantity = moveQuantity;
+                            //detail.Status = "0";
+                            //detail.CanRealOperate = canRealOperate;
+                            //moveBillMaster.MoveBillDetails.Add(detail);
+                    }
+                }
+                Locker.UnLock(haveFrozenStorage);
+            }
+            
+
+
         }
     }
 }

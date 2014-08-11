@@ -258,6 +258,16 @@ namespace THOK.Wms.SignalR.Dispatch.Service
                                     {
                                         quantity = product.SumQuantity - storQuantity;
                                     }
+
+                                    //当备货下限大于3时，而此次调度移库量小于3时，先不移库，等下次再补满下限
+                                    if (areaQuantiy > quantity)
+                                    {
+                                        if (lowerlimitQuantity / product.Product.Unit.Count >= 3 && quantity / product.Product.Unit.Count < 3)
+                                        {
+                                            quantity = 0;
+                                        }
+                                    }
+
                                     if (quantity > 0)
                                     {
                                         if (cancellationToken.IsCancellationRequested) return;
@@ -337,7 +347,6 @@ namespace THOK.Wms.SignalR.Dispatch.Service
                 MoveBillCreater.CreateSyncMoveBillDetail(lastMoveBillMaster);
             }
             MoveBillMasterRepository.SaveChanges();
-
             ps.State = StateType.Info;
             ps.Messages.Add("调度完成!");
             NotifyConnection(ps.Clone());
@@ -396,13 +405,32 @@ namespace THOK.Wms.SignalR.Dispatch.Service
             if (pieceSumQuantity < quantity)
             {
                 areaTypes = new string[] { "2", "3", "5" };
-                ss = storages.Where(s => s.Cell.Area.AreaType != "2" && s.Cell.Area.AreaType != "3" && s.Cell.Area.AreaType != "5"
+                for (int i = 1; i <= ss.Count(); i++)
+                {
+                    //主库区的库存够出时
+                    ss = storages.Where(s => s.Cell.Area.AreaType != "2" && s.Cell.Area.AreaType != "3" && s.Cell.Area.AreaType != "5"
                                             && s.ProductCode == product.ProductCode)
                                  .OrderBy(s => new { s.Cell.Area.AllotOutOrder, s.StorageTime, s.Quantity });
+                    var AllowQuantityOfZK = ss.Take(i).ToArray().Select(s => new { allowQuantity = s.Quantity - s.OutFrozenQuantity }).Sum(s => s.allowQuantity);
+
+                    if (AllowQuantityOfZK - quantity >= 0)
+                    {
+                        ss = ss.Take(i).OrderBy(s => new { s.Cell.Area.AllotOutOrder, s.StorageTime, s.Quantity });
+                        break;
+                    }
+                    //主库区的库存不够出时,再判断件烟货位够不够出
+                    else
+                    {
+                        if (pieceSumQuantity - (quantity - AllowQuantityOfZK) >= 0)
+                        {
+                            ss = ss.Take(i).OrderBy(s => new { s.Cell.Area.AllotOutOrder, s.StorageTime, s.Quantity });
+                            break;
+                        }
+                    }
+                }
                 if (quantity > 0)
                 {
-                    if (!isChoose)
-                        AllotPiece(moveBillMaster, ss, cell, ref quantity, cancellationToken, ps);
+                     AllotPiece(moveBillMaster, ss, cell, ref quantity, cancellationToken, ps);
                 }
             }
 
@@ -468,12 +496,20 @@ namespace THOK.Wms.SignalR.Dispatch.Service
                                   .OrderBy(s => new { s.StorageTime, s.Cell.Area.AllotOutOrder, s.Quantity });
                 if (quantity > 0) AllotBar(moveBillMaster, ss, cell, ref quantity, cancellationToken, ps);
 
-                //分配条烟；排除 件烟区 条烟区 分拣区
+                //分配条烟(下层储位)；排除 件烟区 条烟区 分拣区
                 areaTypes = new string[] { "2", "3", "5" };
                 ss = storages.Where(s => areaTypes.All(a => a != s.Cell.Area.AreaType)
                                             && s.ProductCode == product.ProductCode
                                             && s.Cell.Layer == 1)
-                                  .OrderBy(s => new { s.Cell.Area.AllotOutOrder , s.StorageTime , s.Quantity });
+                                  .OrderBy(s => new { s.Cell.Area.AllotOutOrder, s.StorageTime, s.Quantity });
+                if (quantity > 0) AllotBar(moveBillMaster, ss, cell, ref quantity, cancellationToken, ps);
+
+                //分配条烟(非下层储位)；排除 件烟区 条烟区 分拣区
+                areaTypes = new string[] { "2", "3", "5" };
+                ss = storages.Where(s => areaTypes.All(a => a != s.Cell.Area.AreaType)
+                                            && s.ProductCode == product.ProductCode
+                                            && s.Cell.Layer != 1)
+                                  .OrderBy(s => new { s.Cell.Area.AllotOutOrder, s.StorageTime, s.Quantity });
                 if (quantity > 0) AllotBar(moveBillMaster, ss, cell, ref quantity, cancellationToken, ps);
             }
 

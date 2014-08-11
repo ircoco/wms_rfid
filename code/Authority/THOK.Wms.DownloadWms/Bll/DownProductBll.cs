@@ -24,7 +24,7 @@ namespace THOK.WMS.DownloadWms.Bll
             {
                 DataTable codedt = this.GetProductCode();
                 string codeList = UtinString.MakeString(codedt, "product_code");
-                codeList = "BRANDCODE NOT IN (" + codeList + ")";
+                codeList = "BRAND_N NOT IN (" + codeList + ")";
                 DataTable bradCodeTable = this.GetProductInfo("1=1");
                 DataRow[] bradCodeDr = bradCodeTable.Select(codeList);
                 if (bradCodeDr.Length > 0)
@@ -140,10 +140,15 @@ namespace THOK.WMS.DownloadWms.Bll
                 inbrddr["bar_barcode"] = "";//row["BARCODE_BAR"];
                 inbrddr["package_barcode"] = row["BARCODE_PACKAGE"];
                 inbrddr["one_project_barcode"] = row["BARCODE_ONE_PROJECT"];
-                inbrddr["buy_price"] = row["BUY_PRICE"];
-                inbrddr["trade_price"] = row["TRADE_PRICE"];
-                inbrddr["retail_price"] = row["RETAIL_PRICE"];
-                inbrddr["cost_price"] = row["COST_PRICE"];
+                //inbrddr["buy_price"] = string.IsNullOrEmpty(row["BUY_PRICE"].ToString()) ? 0 : row["BUY_PRICE"];
+                inbrddr["buy_price"] = 0;
+                inbrddr["trade_price"] = string.IsNullOrEmpty(row["TRADE_PRICE"].ToString()) ? 0 : row["TRADE_PRICE"];
+                inbrddr["retail_price"] = string.IsNullOrEmpty(row["RETAIL_PRICE"].ToString()) ? 0 : row["RETAIL_PRICE"];
+                inbrddr["cost_price"] = string.IsNullOrEmpty(row["COST_PRICE"].ToString()) ? 0 : row["COST_PRICE"];
+                //inbrddr["buy_price"] = row["BUY_PRICE"];
+                //inbrddr["trade_price"] = row["TRADE_PRICE"];
+                //inbrddr["retail_price"] = row["RETAIL_PRICE"];
+                //inbrddr["cost_price"] = row["COST_PRICE"];
                 inbrddr["is_filter_tip"] = row["IS_FILTERTIP"];
                 inbrddr["is_new"] = row["IS_NEW"];
                 inbrddr["is_famous"] = row["IS_FAMOUS"];
@@ -193,7 +198,8 @@ namespace THOK.WMS.DownloadWms.Bll
                 inbrddr["bar_barcode"] = row["BARCODE_BAR"];
                 inbrddr["package_barcode"] = row["BARCODE_PACKAGE"];
                 inbrddr["one_project_barcode"] = row["BARCODE_ONE_PROJECT"];
-                inbrddr["buy_price"] = string.IsNullOrEmpty(row["BUY_PRICE"].ToString()) ? 0 : row["BUY_PRICE"];
+                //inbrddr["buy_price"] = string.IsNullOrEmpty(row["BUY_PRICE"].ToString()) ? 0 : row["BUY_PRICE"];
+                inbrddr["buy_price"] = 0;
                 inbrddr["trade_price"] = string.IsNullOrEmpty(row["TRADE_PRICE"].ToString()) ? 0 : row["TRADE_PRICE"];
                 inbrddr["retail_price"] = string.IsNullOrEmpty(row["RETAIL_PRICE"].ToString()) ? 0 : row["RETAIL_PRICE"];
                 inbrddr["cost_price"] = string.IsNullOrEmpty(row["COST_PRICE"].ToString()) ? 0 : row["COST_PRICE"];
@@ -243,7 +249,8 @@ namespace THOK.WMS.DownloadWms.Bll
                 inbrddr["bar_barcode"] = row["BARCODE_BAR"];
                 inbrddr["package_barcode"] = row["BARCODE_PACKAGE"];
                 inbrddr["one_project_barcode"] = row["BARCODE_ONE_PROJECT"];
-                inbrddr["buy_price"] = string.IsNullOrEmpty(row["BUY_PRICE"].ToString()) ? 0 : row["BUY_PRICE"];
+                //inbrddr["buy_price"] = string.IsNullOrEmpty(row["BUY_PRICE"].ToString()) ? 0 : row["BUY_PRICE"];
+                inbrddr["buy_price"] = 0;
                 inbrddr["trade_price"] = string.IsNullOrEmpty(row["TRADE_PRICE"].ToString()) ? 0 : row["TRADE_PRICE"];
                 inbrddr["retail_price"] = string.IsNullOrEmpty(row["RETAIL_PRICE"].ToString()) ? 0 : row["RETAIL_PRICE"];
                 inbrddr["cost_price"] = string.IsNullOrEmpty(row["COST_PRICE"].ToString()) ? 0 : row["COST_PRICE"];

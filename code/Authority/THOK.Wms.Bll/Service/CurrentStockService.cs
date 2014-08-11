@@ -179,9 +179,9 @@ namespace THOK.Wms.Bll.Service
                         (
                             c.ProductCode,
                             c.ProductName,
-                            c.Quantity1,
-                            c.Quantity2,
-                            c.Quantity3
+                            c.Quantity1.ToString().TrimEnd('0').TrimEnd('.'),
+                            c.Quantity2.ToString().TrimEnd('0').TrimEnd('.'),
+                            c.Quantity3.ToString().TrimEnd('0').TrimEnd('.')
                         );
                 }
                 if (currentstorage.Count() > 0)
@@ -217,9 +217,9 @@ namespace THOK.Wms.Bll.Service
                         (
                             c.ProductCode,
                             c.ProductName,
-                            c.Quantity1,
-                            c.Quantity2,
-                            c.Quantity3
+                            c.Quantity1.ToString().TrimEnd('0').TrimEnd('.'),
+                            c.Quantity2.ToString().TrimEnd('0').TrimEnd('.'),
+                            c.Quantity3.ToString().TrimEnd('0').TrimEnd('.')
                         );
                 }
                 if (currentstorage.Count() > 0)
