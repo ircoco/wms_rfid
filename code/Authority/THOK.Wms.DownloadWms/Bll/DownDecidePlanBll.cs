@@ -154,13 +154,19 @@ namespace THOK.Wms.DownloadWms.Bll
             {
                 DataTable middle = this.GetMiddleByBillNo(row["BILL_NO"].ToString().Trim());
                 DataTable prodt = FindUnitListCode(row["PRODUCT_CODE"].ToString());//                
+                if (prodt.Rows.Count == 0)
+                    continue;
                 DataRow detailrow = ds.Tables["WMS_IN_BILLDETAIL"].NewRow();
                 detailrow["bill_no"] = middle.Rows[0]["in_bill_no"].ToString();
                 detailrow["product_code"] = row["PRODUCT_CODE"].ToString();
                 detailrow["price"] = prodt.Rows[0]["TRADE_PRICE"];
-                detailrow["bill_quantity"] = Convert.ToDecimal(Convert.ToDecimal(row["QUANTITY"]) * Convert.ToDecimal(prodt.Rows[0]["quantity01"]) * Convert.ToDecimal(prodt.Rows[0]["quantity02"]) * Convert.ToDecimal(prodt.Rows[0]["quantity03"]));
                 detailrow["allot_quantity"] = 0;
-                detailrow["unit_code"] = prodt.Rows[0]["UNIT_CODE"];
+                //商品为异性烟时，按条显示
+                if (prodt.Rows[0]["IS_ABNORMITY"].Equals("1"))
+                    detailrow["unit_code"] = prodt.Rows[0]["UNIT_CODE02"];
+                else
+                    detailrow["unit_code"] = prodt.Rows[0]["UNIT_CODE"];
+                detailrow["bill_quantity"] = Convert.ToDecimal(Convert.ToDecimal(row["QUANTITY"]) * Convert.ToDecimal(prodt.Rows[0]["quantity01"]) * Convert.ToDecimal(prodt.Rows[0]["quantity02"]) * Convert.ToDecimal(prodt.Rows[0]["quantity03"]));
                 detailrow["description"] = "";
                 detailrow["real_quantity"] = 0;
                 ds.Tables["WMS_IN_BILLDETAIL"].Rows.Add(detailrow);

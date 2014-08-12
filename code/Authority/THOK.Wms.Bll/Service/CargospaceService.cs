@@ -179,7 +179,8 @@ namespace THOK.Wms.Bll.Service
                         IsActive = c.cells.IsActive == "1" ? "可用" : "不可用",
                         UpdateTime = c.storages.UpdateTime.ToString("yyyy-MM-dd")
                     }).OrderByDescending(c => c.asdd4).OrderByDescending(c => c.asdd3).OrderByDescending(c => c.asdd2).OrderByDescending(c => c.asdd1);
-                    var Cells = Cell.Where(c=>c.EmptyQuantity>0);
+                    //var Cells = Cell.Where(c=>c.EmptyQuantity>0);
+                    var Cells = Cell;
                     if (Cells.Count() > 0)
                     {
                         return Cells.ToArray();

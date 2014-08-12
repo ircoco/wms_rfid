@@ -186,9 +186,9 @@ namespace THOK.WMS.DownloadWms.Bll
                routeDr["custom_code"] = row["custom_code"].ToString().Trim();
                routeDr["deliver_line_name"] = row["deliver_line_name"].ToString().Trim();
                routeDr["dist_code"] = row["dist_code"];
-               routeDr["deliver_order"] = row["deliver_order"];
+               routeDr["deliver_order"] = row["deliver_order"] == DBNull.Value ? "0":row["deliver_order"];
                routeDr["description"] = "";
-               routeDr["is_active"] = row["is_active"];
+               routeDr["is_active"] = row["is_active"] == DBNull.Value ? "0" : row["is_active"]; 
                routeDr["update_time"] = DateTime.Now;
                routeDr["new_deliver_line_code"] = row["new_deliver_line_code"].ToString().Trim();
                ds.Tables["DWV_OUT_DELIVER_LINE"].Rows.Add(routeDr);

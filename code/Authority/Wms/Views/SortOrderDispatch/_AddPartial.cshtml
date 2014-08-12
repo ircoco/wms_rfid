@@ -39,6 +39,8 @@
         if (sortlineCode != "" && sortlineCode != null) {
             var rows = $('#sortingOrderAllot').datagrid('getSelections');
             if (rows.length > 0) {
+                //±‹√‚÷ÿ∏¥Ã·Ωª
+                $('#dlg').dialog('close')
                 for (var i = 0; i < rows.length; i++) {
                     deliverLineCode += rows[i].DeliverLineCode + ",";
                 }

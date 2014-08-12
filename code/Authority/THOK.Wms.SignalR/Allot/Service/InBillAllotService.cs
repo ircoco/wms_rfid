@@ -123,7 +123,7 @@ namespace THOK.Wms.SignalR.Allot.Service
                                                 || c.Storages.Any(s => string.IsNullOrEmpty(s.LockTag)
                                                     && s.Quantity == 0
                                                     && s.InFrozenQuantity == 0))
-                                              .OrderBy(c => c.Area.AllotInOrder);
+                                              .OrderBy(c => c.Area.AllotInOrder).OrderByDescending(c => c.MaxQuantity);
             //条烟区
             var cellQueryFromList2 = cell2.OrderBy(c => c.Area.AllotInOrder);
 

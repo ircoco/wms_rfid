@@ -83,7 +83,7 @@ namespace THOK.Wms.Bll.Service
                 lowerLimit = lowerLimit.Where(l => l.IsActive == IsActive);
             }
             int total = lowerLimit.Count();
-            lowerLimit = lowerLimit.OrderBy(r => r.SortingLineCode).ThenBy(r=>r.SortOrder);
+            lowerLimit = lowerLimit.OrderBy(r => r.SortingLineCode).ThenBy(r=>r.SortOrder).ThenBy(r=> r.ProductCode);
             lowerLimit = lowerLimit.Skip((page - 1) * rows).Take(rows);
 
             var temp1 = lowerLimit.GroupJoin(storageQuery,

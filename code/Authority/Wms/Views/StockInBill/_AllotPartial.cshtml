@@ -56,6 +56,12 @@
  });
  function createTable(type, id) {
      var div = document.getElementById("drop");
+     var rowData = $('#inAllotBillDetails').datagrid('getRows');
+     var columnData = new Array(rowData.length);
+     for (var i = 0; i < rowData.length; i++) {
+         columnData[i] = rowData[i].ProductCode;
+     }
+
      while (div.hasChildNodes()) {
          div.removeChild(div.firstChild);
      }
@@ -78,9 +84,20 @@
                      var cell = row1.insertCell(); //创建一个单元
                      mydiv.style.width = "100px";
                      mydiv.style.height = "100px";
-                     mydiv.style.backgroundColor = "#40e0d0";
+                     if (columnData.indexOf(data[s].productCode) != -1) {
+                         if (data[s].Quantity > 0)
+                             mydiv.style.backgroundColor = "#9F9F5F"; //正在入库卷烟所在的货位颜色
+                         else
+                             mydiv.style.backgroundColor = "#40e0d0"; 
+                     }
+                     else {
+                         if (data[s].Quantity > 0)
+                             mydiv.style.backgroundColor = "#90ee90"; //其他卷烟货位颜色
+                         else
+                             mydiv.style.backgroundColor = "#40e0d0"; //空货位颜色
+                     }
                      cell.appendChild(mydiv);
-                     mydiv.innerHTML = data[s].cellName + '<br />' + data[s].productName + '<br />' + data[s].Quantity + data[s].unitName;
+                     mydiv.innerHTML = data[s].cellName + '<br />' + data[s].productName + '<br />' + data[s].Quantity + data[s].unitName + '<br /><br />最大量：' + data[s].maxQuantity;
                  }
                  if (data[s].asdd3 == '2') {
                      var mydiv = document.createElement("div");
@@ -91,8 +108,20 @@
                      mydiv.style.width = "100px";
                      mydiv.style.height = "100px";
                      mydiv.style.backgroundColor = "#40e0d0";
+                     if (columnData.indexOf(data[s].productCode) != -1) {
+                         if (data[s].Quantity > 0)
+                             mydiv.style.backgroundColor = "#9F9F5F"; //正在入库卷烟所在的货位颜色
+                         else
+                             mydiv.style.backgroundColor = "#40e0d0";
+                     }
+                     else {
+                         if (data[s].Quantity > 0)
+                             mydiv.style.backgroundColor = "#90ee90"; //其他卷烟货位颜色
+                         else
+                             mydiv.style.backgroundColor = "#40e0d0"; //空货位颜色
+                     }
                      cell.appendChild(mydiv);
-                     mydiv.innerHTML = data[s].cellName + '<br />' + data[s].productName + '<br />' + data[s].Quantity + data[s].unitName;
+                     mydiv.innerHTML = data[s].cellName + '<br />' + data[s].productName + '<br />' + data[s].Quantity + data[s].unitName + '<br /><br />最大量：' + data[s].maxQuantity;
 
                  }
                  if (data[s].asdd3 == '3') {
@@ -104,8 +133,20 @@
                      mydiv.style.width = "100px";
                      mydiv.style.height = "100px";
                      mydiv.style.backgroundColor = "#40e0d0";
+                     if (columnData.indexOf(data[s].productCode) != -1) {
+                         if (data[s].Quantity > 0)
+                             mydiv.style.backgroundColor = "#9F9F5F"; //正在入库卷烟所在的货位颜色
+                         else
+                             mydiv.style.backgroundColor = "#40e0d0";
+                     }
+                     else {
+                         if (data[s].Quantity > 0)
+                             mydiv.style.backgroundColor = "#90ee90"; //其他卷烟货位颜色
+                         else
+                             mydiv.style.backgroundColor = "#40e0d0"; //空货位颜色
+                     }
                      cell.appendChild(mydiv);
-                     mydiv.innerHTML = data[s].cellName + '<br />' + data[s].productName + '<br />' + data[s].Quantity + data[s].unitName;
+                     mydiv.innerHTML = data[s].cellName + '<br />' + data[s].productName + '<br />' + data[s].Quantity + data[s].unitName + '<br /><br />最大量：' + data[s].maxQuantity;
                  }
              }
          }

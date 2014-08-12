@@ -22,6 +22,8 @@ namespace THOK.Wms.AutomotiveSystems.Interfaces
 
         void SearchRfidInfo(string rfidId, Result result);
 
+        void SearchCellRfid(Result result);
+
         bool ProcessSortInfo(string orderdate, string batchId, string sortingLineCode, string orderId, ref string error);
     }
 }

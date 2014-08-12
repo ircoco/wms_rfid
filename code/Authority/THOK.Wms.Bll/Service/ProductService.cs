@@ -114,6 +114,7 @@ namespace THOK.Wms.Bll.Service
                 c.UnitCode,
                 c.Unit.UnitName,
                 c.UnitListCode,
+                c.CellMaxProductQuantity,
                 UpdateTime = c.UpdateTime.ToString("yyyy-MM-dd hh:mm:ss"),
                 IsRounding = WhatRoundingType(c.IsRounding)
             });
