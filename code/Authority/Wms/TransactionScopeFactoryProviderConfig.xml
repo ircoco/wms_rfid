@@ -4,7 +4,7 @@
 	<property name="MasterDataConfigurationDictionary">
 		<key name="master">
 			<DataConfiguration type="DBRabbit.Config.DataConfiguration,DBRabbit.dll">
-				<DataBaseType value ="OleDb"  desc =""/>
+				<DataBaseType value ="SqlServer"  desc =""/>
 				<ORMappingType value ="Emit" desc =""/>
 				<CommandTimeoutInSecs value ="" desc =""/>
 				<ConnectionLifetimeInSecs value ="" desc =""/>
@@ -12,9 +12,9 @@
 				<MaxPoolSize value ="" desc =""/>
 				<DataBaseSchemaFileName value ="" desc =""/>
 				
-				<DataSource value ="Provider=SQLOLEDB;Data Source=.;Password=123456;User ID=sa;Initial Catalog=SortDB" desc =""/>
+				<DataSource value ="" desc =""/>
 				<IP value ="." desc =""/>
-				<DataBaseName value ="master" desc =""/>
+				<DataBaseName value ="wms_rfid_db_GX" desc =""/>
 				<User value ="sa" desc =""/>
 				<Password value ="123456" desc =""/>
 			</DataConfiguration>
